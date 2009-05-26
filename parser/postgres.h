@@ -11,4 +11,8 @@ typedef enum {
     true = 1
 } bool;
 
+int yylloc;
+
+void yyerror(const char* message);
+
 #endif
