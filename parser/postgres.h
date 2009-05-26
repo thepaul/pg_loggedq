@@ -15,4 +15,12 @@ int yylloc;
 
 void yyerror(const char* message);
 
+typedef union {
+    char* str;
+    char* keyword;
+    long int ival;
+} YYSTYPE;
+
+YYSTYPE yylval;
+
 #endif
