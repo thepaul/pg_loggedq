@@ -10,35 +10,26 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <string.h>
+#include "sqllexer.h"
 
-typedef char YYSTYPE;
-typedef char YYLTYPE;
+#define GET_EXTRA     per_scanner_data* extrad = yyget_extra(yyscanner)
+#define xcdepth       (yyextra->_xcdepth)
+#define dolqstart     (yyextra->_dolqstart)
+#define lval          (yyextra->_lval)
+#define yylloc        (extrad->_yylloc)
+#define literalbuf    (extrad->_literalbuf)
+#define literallen    (extrad->_literallen)
+#define literalalloc  (extrad->_literalalloc)
+#define scanbufhandle (extrad->_scanbufhandle)
+#define scanbuf       (extrad->_scanbuf)
 
-#define CONSTANT_REPLACED 1
-#define NEXT_TOKEN 2
-#define SEND_IT_BACK yylval = strndup(yytext, yyleng); return NEXT_TOKEN
+static void startlit(yyscan_t yyscanner);
+static void addlit(char *ytext, int yleng, yyscan_t yyscanner);
+static void addlitchar(unsigned char ychar, yyscan_t yyscanner);
+static char *litbufdup(yyscan_t yyscanner);
 
-static int		xcdepth = 0;	/* depth of nesting in slash-star comments */
-static char    *dolqstart;      /* current $foo$ quote start string */
-int yylloc;
-char* yylval;
-
-void yyerror(const char* message);
-
-/*
- * literalbuf is used to accumulate literal values when multiple rules
- * are needed to parse a single literal.  Call startlit to reset buffer
- * to empty, addlit to add text.  Note that the buffer is calloc'd and
- * starts life afresh on every parse cycle.
- */
-static char	   *literalbuf;		/* expandable buffer */
-static int		literallen;		/* actual current length */
-static int		literalalloc;	/* current allocated buffer size */
-
-#define startlit()  (literalbuf[0] = '\0', literallen = 0)
-static void addlit(char *ytext, int yleng);
-static void addlitchar(unsigned char ychar);
-static char *litbufdup(void);
+void _yyerror(const char* message, yyscan_t yyscanner);
+#define yyerror(m) (_yyerror((m), yyscanner))
 
 /*
  * Each call to yylex must set yylloc to the location of the found token
@@ -47,11 +38,7 @@ static char *litbufdup(void);
  * this should be done in the first such rule, else yylloc will point
  * into the middle of the token.
  */
-#define SET_YYLLOC()  (yylloc = yytext - scanbuf)
-
-/* Handles to the buffer that the lexer uses internally */
-static YY_BUFFER_STATE scanbufhandle;
-static char *scanbuf;
+#define SET_YYLLOC()  (yyextra->_yylloc = yytext - yyextra->_scanbuf)
 
 %}
 
@@ -60,8 +47,11 @@ static char *scanbuf;
 %option nodefault
 %option nounput
 %option noyywrap
+%option reentrant
+%option bison-bridge
 %option prefix="base_yy"
 %option header="scan.h"
+%option extra-type="per_scanner_data*"
 
 /*
  * OK, here is a short description of lex/flex rules behavior.
@@ -278,7 +268,7 @@ other			.
 %%
 
 {whitespace}	{
-					yylval = strdup(" ");
+					lval = strdup(" ");
                     return NEXT_TOKEN;
 				}
 
@@ -301,7 +291,7 @@ other			.
 					if (xcdepth <= 0)
                     {
 						BEGIN(INITIAL);
-                        yylval = strdup(" ");
+                        lval = strdup(" ");
                         return NEXT_TOKEN;
                     }
 					else
@@ -336,7 +326,7 @@ other			.
 <xb>{quotefail} {
 					yyless(1);
 					BEGIN(INITIAL);
-					yylval = NULL;
+					lval = NULL;
 					return CONSTANT_REPLACED;
 				}
 <xh>{xhinside}	|
@@ -362,7 +352,7 @@ other			.
 <xh>{quotefail} {
 					yyless(1);
 					BEGIN(INITIAL);
-					yylval = NULL;
+					lval = NULL;
 					return CONSTANT_REPLACED;
 				}
 <xh><<EOF>>		{ yyerror("unterminated hexadecimal string literal"); }
@@ -384,7 +374,7 @@ other			.
 <xq,xe>{quotefail} {
 					yyless(1);
 					BEGIN(INITIAL);
-					yylval = NULL;
+					lval = NULL;
 					return CONSTANT_REPLACED;
 				}
 <xq,xe>{xqdouble} {
@@ -423,7 +413,7 @@ other			.
 					{
 						free(dolqstart);
 						BEGIN(INITIAL);
-						yylval = NULL;
+						lval = NULL;
 						return CONSTANT_REPLACED;
 					}
 					else
@@ -448,20 +438,20 @@ other			.
 {xdstart}		{
 					SET_YYLLOC();
 					BEGIN(xd);
-					startlit();
-                    addlit(yytext, yyleng);
+					startlit(yyscanner);
+					addlit(yytext, yyleng, yyscanner);
 				}
 <xd>{xdstop}	{
 					BEGIN(INITIAL);
-                    addlit(yytext, yyleng);
-					yylval = litbufdup();
+					addlit(yytext, yyleng, yyscanner);
+					lval = litbufdup(yyscanner);
 					return NEXT_TOKEN;
 				}
 <xd>{xddouble}	{
-					addlitchar('"');
+					addlitchar('"', yyscanner);
 				}
 <xd>{xdinside}	{
-					addlit(yytext, yyleng);
+					addlit(yytext, yyleng, yyscanner);
 				}
 <xd><<EOF>>		{ yyerror("unterminated quoted identifier"); }
 
@@ -535,7 +525,7 @@ other			.
 						 */
 						if (nchars == 1 &&
 							strchr(",()[].;:+-*/%^<>=", yytext[0]))
-                            yylval = strndup(yytext, 1);
+                            lval = strndup(yytext, 1);
                             return NEXT_TOKEN;
 					}
 
@@ -549,17 +539,17 @@ other			.
 
 {integer}		{
 					SET_YYLLOC();
-                    yylval = NULL;
+                    lval = NULL;
                     return CONSTANT_REPLACED;
 				}
 {decimal}		{
 					SET_YYLLOC();
-                    yylval = NULL;
+                    lval = NULL;
                     return CONSTANT_REPLACED;
 				}
 {real}			{
 					SET_YYLLOC();
-                    yylval = NULL;
+                    lval = NULL;
                     return CONSTANT_REPLACED;
 				}
 {realfail1}		{
@@ -571,22 +561,22 @@ other			.
 					 */
 					yyless(yyleng-1);
 					SET_YYLLOC();
-                    yylval = NULL;
+                    lval = NULL;
                     return CONSTANT_REPLACED;
 				}
 {realfail2}		{
 					/* throw back the [Ee][+-], and proceed as above */
 					yyless(yyleng-2);
 					SET_YYLLOC();
-                    yylval = NULL;
+                    lval = NULL;
                     return CONSTANT_REPLACED;
 				}
 
 {identifier}	{
                     char* s;
 					SET_YYLLOC();
-                    yylval = strndup(yytext, yyleng);
-                    for (s = yylval; *s; ++s)
+                    lval = strndup(yytext, yyleng);
+                    for (s = lval; *s; ++s)
                         *s = tolower(*s);
 					return NEXT_TOKEN;
 				}
@@ -614,8 +604,9 @@ other			.
  * be misleading!
  */
 void
-yyerror(const char *message)
+_yyerror(const char *message, yyscan_t yyscanner)
 {
+	GET_EXTRA;
 	const char *loc = scanbuf + yylloc;
 
 	if (*loc == YY_END_OF_BUFFER_CHAR)
@@ -629,15 +620,14 @@ yyerror(const char *message)
  * Called before any actual parsing is done
  */
 void
-scanner_init(const char *str)
+scanner_init(const char *str, yyscan_t yyscanner)
 {
 	size_t	slen = strlen(str);
+	GET_EXTRA;
 
-	/*
-	 * Might be left over after ereport()
-	 */
-	if (YY_CURRENT_BUFFER)
-		yy_delete_buffer(YY_CURRENT_BUFFER);
+	extrad->_xcdepth = 0;
+	extrad->_dolqstart = NULL;
+	extrad->_yylloc = 0;
 
 	/*
 	 * Make a scan buffer with special termination needed by flex.
@@ -645,14 +635,12 @@ scanner_init(const char *str)
 	scanbuf = calloc(slen + 2, 1);
 	memcpy(scanbuf, str, slen);
 	scanbuf[slen] = scanbuf[slen + 1] = YY_END_OF_BUFFER_CHAR;
-	scanbufhandle = yy_scan_buffer(scanbuf, slen + 2);
+	scanbufhandle = yy_scan_buffer(scanbuf, slen + 2, yyscanner);
 
 	/* initialize literal buffer to a reasonable but expansible size */
 	literalalloc = 1024;
 	literalbuf = (char *) calloc(literalalloc, 1);
-	startlit();
-
-	BEGIN(INITIAL);
+	startlit(yyscanner);
 }
 
 
@@ -660,16 +648,27 @@ scanner_init(const char *str)
  * Called after parsing is done to clean up after scanner_init()
  */
 void
-scanner_finish(void)
+scanner_finish(yyscan_t yyscanner)
 {
-	yy_delete_buffer(scanbufhandle);
+	GET_EXTRA;
+	yy_delete_buffer(scanbufhandle, yyscanner);
 	free(scanbuf);
 }
 
 
 static void
-addlit(char *ytext, int yleng)
+startlit(yyscan_t yyscanner)
 {
+	GET_EXTRA;
+	literalbuf[0] = '\0';
+	literallen = 0;
+}
+
+
+static void
+addlit(char *ytext, int yleng, yyscan_t yyscanner)
+{
+	GET_EXTRA;
 	/* enlarge buffer if needed */
 	if ((literallen+yleng) >= literalalloc)
 	{
@@ -686,8 +685,9 @@ addlit(char *ytext, int yleng)
 
 
 static void
-addlitchar(unsigned char ychar)
+addlitchar(unsigned char ychar, yyscan_t yyscanner)
 {
+	GET_EXTRA;
 	/* enlarge buffer if needed */
 	if ((literallen+1) >= literalalloc)
 	{
@@ -707,9 +707,10 @@ addlitchar(unsigned char ychar)
  * already known.
  */
 static char *
-litbufdup(void)
+litbufdup(yyscan_t yyscanner)
 {
 	char *new;
+	GET_EXTRA;
 
 	new = calloc(literallen + 1, 1);
 	memcpy(new, literalbuf, literallen+1);
