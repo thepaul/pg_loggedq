@@ -6,14 +6,11 @@ LEX := flex
 scan.so: scan.o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
-scan.o: CFLAGS+=-fPIC
+scan.o: CFLAGS+=-fPIC -D_GNU_SOURCE
 scan.o: scan.c
 
 scan.c: scan.l
-	echo "#define _GNU_SOURCE" > $@.tmp
 	$(LEX) -o $@ $^
-	cat $@ >> $@.tmp
-	mv $@.tmp $@
 
 clean:
 	$(RM) scan.o scan.c scan.so
