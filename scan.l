@@ -61,6 +61,7 @@ static char *scanbuf;
 %option nounput
 %option noyywrap
 %option prefix="base_yy"
+%option header="scan.h"
 
 /*
  * OK, here is a short description of lex/flex rules behavior.

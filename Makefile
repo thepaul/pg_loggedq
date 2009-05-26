@@ -13,6 +13,6 @@ scan.c: scan.l
 	$(LEX) -o $@ $^
 
 clean:
-	$(RM) scan.o scan.c scan.so
+	$(RM) scan.o scan.c scan.h scan.so
 
 .PHONY: clean
