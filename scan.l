@@ -548,15 +548,18 @@ other			.
 
 {integer}		{
 					SET_YYLLOC();
-                    SEND_IT_BACK;
+                    yylval = NULL;
+                    return CONSTANT_REPLACED;
 				}
 {decimal}		{
 					SET_YYLLOC();
-                    SEND_IT_BACK;
+                    yylval = NULL;
+                    return CONSTANT_REPLACED;
 				}
 {real}			{
 					SET_YYLLOC();
-                    SEND_IT_BACK;
+                    yylval = NULL;
+                    return CONSTANT_REPLACED;
 				}
 {realfail1}		{
 					/*
@@ -567,13 +570,15 @@ other			.
 					 */
 					yyless(yyleng-1);
 					SET_YYLLOC();
-                    SEND_IT_BACK;
+                    yylval = NULL;
+                    return CONSTANT_REPLACED;
 				}
 {realfail2}		{
 					/* throw back the [Ee][+-], and proceed as above */
 					yyless(yyleng-2);
 					SET_YYLLOC();
-                    SEND_IT_BACK;
+                    yylval = NULL;
+                    return CONSTANT_REPLACED;
 				}
 
 {identifier}	{
