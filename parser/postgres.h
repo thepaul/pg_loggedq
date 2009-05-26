@@ -23,4 +23,15 @@ typedef union {
 
 YYSTYPE yylval;
 
+/* pg default is 64, but we want to accept everything we can */
+#define NAMEDATALEN 1024
+
+#define ERROR 1
+#define WARNING 2
+
+#define pstrdup(s) (strdup(s))
+#define palloc(n) (calloc(n, 1))
+#define pfree(x) (free(x))
+#define repalloc(b,n) (realloc(b,n))
+
 #endif
