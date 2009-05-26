@@ -3,6 +3,10 @@
 CFLAGS := -Wall -g
 LEX := flex
 
+scan.so: scan.o
+	$(CC) $(LDFLAGS) -shared -o $@ $^
+
+scan.o: CFLAGS+=-fPIC
 scan.o: scan.c
 
 scan.c: scan.l
@@ -12,6 +16,6 @@ scan.c: scan.l
 	mv $@.tmp $@
 
 clean:
-	$(RM) scan.o scan.c
+	$(RM) scan.o scan.c scan.so
 
 .PHONY: clean
