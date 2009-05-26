@@ -6,6 +6,10 @@ scanner_init = scan_so.scanner_init
 scanner_init.argtypes = [c_char_p]
 scanner_init.restype = None
 
+scanner_finish = scan_so.scanner_finish
+scanner_finish.argtypes = []
+scanner_finish.restype = None
+
 yylex = scan_so.base_yylex
 yylex.argtypes = []
 yylex.restype = c_int
@@ -22,3 +26,4 @@ def tokenize_sql(sql):
             yield '?'
         elif result == 2:
             yield yylval.value
+    scanner_finish()
