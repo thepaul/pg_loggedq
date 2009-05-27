@@ -22,6 +22,6 @@ test: test.o $(SCAN).o parser/adapt.o
 test.o: $(SCAN).c
 
 clean:
-	$(RM) $(SCAN).[och] scan.so
+	$(RM) $(SCAN).[och] parser/adapt.o scan.so
 
 .PHONY: clean
