@@ -6,16 +6,16 @@
 void scanner_init(const char* sql);
 
 extern YYSTYPE yylval;
-extern int seen_error;
+extern int escape_string_warning;
 
 int main()
 {
     int res;
 
-    scanner_init("select f from bar WHERE 9 = 'f''o\'o' and \"MO\"\"NKey\" + $6::int *~~& -24;");
+    escape_string_warning = false;
+    scanner_init("select f from bar WHERE 9 = 'f''o\\'o' and \"MO\"\"NKey\" + $6::int *~~& -24;");
 
     do {
-        fprintf(stderr, "checking yylex\n");
         res = base_yylex();
         switch (res)
         {
@@ -52,8 +52,6 @@ int main()
             default:
                 printf("CHAR '%c' (keep intact)\n", res);
         }
-        if (seen_error)
-            break;
     } while (res);
 
     return 0;
