@@ -3,7 +3,7 @@
 SCAN := parser/scan
 CFLAGS := -Wall -g
 LEX := flex
-LEXOPTIONS := --header-file=$(SCAN).h
+LEXOPTIONS := --header-file=$(SCAN).h -R
 
 scan.so: $(SCAN).o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
