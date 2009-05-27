@@ -96,6 +96,8 @@ static char *scanbuf;
 
 static unsigned char unescape_single_char(unsigned char c);
 
+#include "make_reentrant.h"
+
 %}
 
 %option 8bit
@@ -786,7 +788,7 @@ lexer_errposition(void)
  * be misleading!
  */
 void
-yyerror(const char *message)
+_yyerror(const char *message, yyscan_t yyscanner)
 {
 	const char *loc = scanbuf + yylloc;
 
@@ -813,15 +815,16 @@ yyerror(const char *message)
  * Called before any actual parsing is done
  */
 void
-scanner_init(const char *str)
+scanner_init(const char *str, yyscan_t yyscanner)
 {
 	Size	slen = strlen(str);
+	GET_EXTRA;
 
 	/*
 	 * Might be left over after ereport()
 	 */
 	if (YY_CURRENT_BUFFER)
-		yy_delete_buffer(YY_CURRENT_BUFFER);
+		yy_delete_buffer(YY_CURRENT_BUFFER, yyscanner);
 
 	/*
 	 * Make a scan buffer with special termination needed by flex.
@@ -844,9 +847,10 @@ scanner_init(const char *str)
  * Called after parsing is done to clean up after scanner_init()
  */
 void
-scanner_finish(void)
+scanner_finish(yyscan_t yyscanner)
 {
-	yy_delete_buffer(scanbufhandle);
+	GET_EXTRA;
+	yy_delete_buffer(scanbufhandle, yyscanner);
 	pfree(scanbuf);
 }
 
