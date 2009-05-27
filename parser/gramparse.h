@@ -1,14 +1,14 @@
 #ifndef dummy_gramparse_h
 #define dummy_gramparse_h
 
-#define BCONST   1
-#define XCONST   2
-#define ICONST   3
-#define FCONST   4
-#define SCONST   5
-#define TYPECAST 9
-#define PARAM    10
-#define IDENT    11
-#define Op       12
+#define BCONST   1001
+#define XCONST   1002
+#define ICONST   1003
+#define FCONST   1004
+#define SCONST   1005
+#define TYPECAST 1009
+#define PARAM    1010
+#define IDENT    1011
+#define Op       1012
 
 #endif
