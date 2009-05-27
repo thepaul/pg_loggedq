@@ -6,6 +6,7 @@
 #define ICONST   1003
 #define FCONST   1004
 #define SCONST   1005
+#define KEYWORD  1006
 #define TYPECAST 1009
 #define PARAM    1010
 #define IDENT    1011

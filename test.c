@@ -1,25 +1,60 @@
 #include <stdio.h>
-#include "sqllexer.h"
+#include "parser/scan.h"
+#include "parser/postgres.h"
+#include "parser/gramparse.h"
 
-void scanner_init(const char* sql, void* yyscanner);
+void scanner_init(const char* sql);
+
+extern YYSTYPE yylval;
+extern int seen_error;
 
 int main()
 {
-    void* yyscanner;
-    per_scanner_data d;
     int res;
 
-    base_yylex_init_extra(&d, &yyscanner);
-    scanner_init("select foo from bar where 9 = 'foo';", yyscanner);
+    scanner_init("select f from bar WHERE 9 = 'f''o\'o' and \"MO\"\"NKey\" + $6::int *~~& -24;");
 
     do {
-        res = base_yylex("", yyscanner);
-        if (res == CONSTANT_REPLACED)
-            printf("?");
-        else if (res == NEXT_TOKEN)
-            printf("%s", d._lval);
+        fprintf(stderr, "checking yylex\n");
+        res = base_yylex();
+        switch (res)
+        {
+            case BCONST:
+            case XCONST:
+            case FCONST:
+            case SCONST:
+                printf("constant %s replaced with ?\n", yylval.str);
+                free(yylval.str);
+                break;
+            case ICONST:
+                printf("constant (iconst) %ld replaced with ?\n", yylval.ival);
+                break;
+            case TYPECAST:
+                printf("TYPECAST ::\n");
+                break;
+            case PARAM:
+                printf("PARAM %ld\n", yylval.ival);
+                break;
+            case IDENT:
+                printf("IDENT %s\n", yylval.str);
+                free(yylval.str);
+                break;
+            case Op:
+                printf("Op %s\n", yylval.str);
+                free(yylval.str);
+                break;
+            case KEYWORD:
+                printf("KEYWORD %s\n", yylval.keyword);
+                free(yylval.keyword);
+                break;
+            case 0:
+                break;
+            default:
+                printf("CHAR '%c' (keep intact)\n", res);
+        }
+        if (seen_error)
+            break;
     } while (res);
-    printf("\n");
 
     return 0;
 }

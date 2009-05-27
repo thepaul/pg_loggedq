@@ -1,9 +1,9 @@
 # pg_loggedq scanner module
 
+SCAN := parser/scan
 CFLAGS := -Wall -g
 LEX := flex
-
-SCAN := parser/scan
+LEXOPTIONS := --header-file=$(SCAN).h
 
 scan.so: $(SCAN).o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
@@ -12,7 +12,14 @@ $(SCAN).o: CFLAGS+=-fPIC -D_GNU_SOURCE -I.
 $(SCAN).o: $(SCAN).c
 
 $(SCAN).c: $(SCAN).l
-	$(LEX) -o $@ $^
+	$(LEX) $(LEXOPTIONS) -o $@ $^
+
+parser/adapt.o: parser/adapt.c
+
+test: test.o $(SCAN).o parser/adapt.o
+	$(CC) $(LDOPTIONS) -o $@ $^
+
+test.o: $(SCAN).c
 
 clean:
 	$(RM) $(SCAN).[och] scan.so

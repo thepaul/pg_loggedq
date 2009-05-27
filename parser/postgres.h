@@ -11,8 +11,6 @@ typedef enum {
     true = 1
 } bool;
 
-int yylloc;
-
 void yyerror(const char* message);
 
 typedef union {
@@ -20,8 +18,6 @@ typedef union {
     char* keyword;
     long int ival;
 } YYSTYPE;
-
-YYSTYPE yylval;
 
 typedef size_t Size;
 
@@ -32,7 +28,7 @@ typedef struct {
 
 ScanKeyword* ScanKeywordLookup(const char* name);
 void report_error(int code, const char* msg, ...);
-const char* errmsg(const char* fmt, ...);
+char* errmsg(const char* fmt, ...);
 void truncate_identifier(char* str, int len, int mongoose);
 char* downcase_truncate_identifier(const char* str, int len, int mongoose);
 
