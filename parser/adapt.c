@@ -23,7 +23,7 @@ lexer_init(const char* sql)
     extra._xcdepth = 0;
     extra._dolqstart = NULL;
     extra._backslash_quote = BACKSLASH_QUOTE_SAFE_ENCODING;
-    extra._escape_string_warning = true;
+    extra._escape_string_warning = false;
     extra._standard_conforming_strings = false;
     extra._warn_on_first_escape = false;
     extra._saw_high_bit = false;
