@@ -3,6 +3,12 @@
 #ifndef per_scanner_data_h
 #define per_scanner_data_h
 
+#ifdef YY_EXTRA_TYPE
+#undef YY_EXTRA_TYPE
+#endif
+
+#define YY_EXTRA_TYPE per_scanner_data*
+
 struct _per_scanner_data;
 typedef struct _per_scanner_data per_scanner_data;
 

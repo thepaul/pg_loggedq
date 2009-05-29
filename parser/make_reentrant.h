@@ -3,12 +3,6 @@
 
 #include "per_scanner_data.h"
 
-#ifdef YY_EXTRA_TYPE
-#undef YY_EXTRA_TYPE
-#endif
-
-#define YY_EXTRA_TYPE per_scanner_data*
-
 #define GET_EXTRA    struct yyguts_t* yyg = (struct yyguts_t*)yyscanner
 
 #define xcdepth                      (yyextra->_xcdepth)

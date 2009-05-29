@@ -33,7 +33,7 @@ lexer_init(const char* sql)
     extra._scanbufhandle = NULL;
     extra._scanbuf = NULL;
 
-    if (yylex_init_extra(&extra, &scanner) != 0)
+    if (base_yylex_init_extra(&extra, &scanner) != 0)
         return NULL;
     scanner_init(sql, scanner);
     return scanner;
@@ -43,7 +43,7 @@ void
 lexer_destroy(yyscan_t scanner)
 {
     scanner_finish(scanner);
-    yylex_destroy(scanner);
+    base_yylex_destroy(scanner);
 }
 
 char*
