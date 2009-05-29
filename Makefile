@@ -1,7 +1,7 @@
 # pg_loggedq scanner module
 
 SCAN := parser/scan
-CFLAGS := -Wall -g
+CFLAGS := -Wall -g -Wno-unused-variable -Wno-unused-function
 LEX := flex
 LEXOPTIONS := --header-file=$(SCAN).h -R
 

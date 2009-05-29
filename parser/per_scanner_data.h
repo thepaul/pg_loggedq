@@ -1,26 +1,27 @@
 /* sqllexer.h */
 
-#ifndef SQLLEXER_H
-#define SQLLEXER_H
+#ifndef per_scanner_data_h
+#define per_scanner_data_h
 
 struct _per_scanner_data;
 typedef struct _per_scanner_data per_scanner_data;
-
-typedef char YYSTYPE;
 
 #ifndef YY_CURRENT_BUFFER
 #include "scan.h"
 #endif
 
-#define CONSTANT_REPLACED 1
-#define NEXT_TOKEN 2
-#define SEND_IT_BACK lval = strndup(yytext, yyleng); return NEXT_TOKEN
+#include "postgres.h"
 
 struct _per_scanner_data {
     int		_xcdepth;		/* depth of nesting in slash-star comments */
     char    *_dolqstart;    /* current $foo$ quote start string */
     int		_yylloc;
-    char	*_lval;
+    YYSTYPE _yylval;
+    BackslashQuoteType _backslash_quote;
+    bool    _escape_string_warning;
+    bool    _standard_conforming_strings;
+    bool    _warn_on_first_escape;
+    bool    _saw_high_bit;
 
     /*
      * literalbuf is used to accumulate literal values when multiple rules

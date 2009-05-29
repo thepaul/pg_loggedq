@@ -5,10 +5,6 @@
 
 /* just a place for scan.l globals that need to be accessible outside */
 
-int yylloc;
-
-YYSTYPE yylval;
-
 extern int seen_error;
 
 #define YY_BREAK if (seen_error) { yyterminate(); } break;

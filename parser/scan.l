@@ -767,8 +767,10 @@ other			.
  * since it depends on scanbuf to still be valid.
  */
 static int
-lexer_errposition(void)
+r_lexer_errposition(yyscan_t yyscanner)
 {
+	GET_EXTRA;
+
 	int		pos;
 
 	/* Convert byte offset to character number */
@@ -790,6 +792,7 @@ lexer_errposition(void)
 void
 _yyerror(const char *message, yyscan_t yyscanner)
 {
+	GET_EXTRA;
 	const char *loc = scanbuf + yylloc;
 
 	if (*loc == YY_END_OF_BUFFER_CHAR)
@@ -832,7 +835,7 @@ scanner_init(const char *str, yyscan_t yyscanner)
 	scanbuf = palloc(slen + 2);
 	memcpy(scanbuf, str, slen);
 	scanbuf[slen] = scanbuf[slen + 1] = YY_END_OF_BUFFER_CHAR;
-	scanbufhandle = yy_scan_buffer(scanbuf, slen + 2);
+	scanbufhandle = yy_scan_buffer(scanbuf, slen + 2, yyscanner);
 
 	/* initialize literal buffer to a reasonable but expansible size */
 	literalalloc = 1024;
@@ -856,8 +859,9 @@ scanner_finish(yyscan_t yyscanner)
 
 
 static void
-addlit(char *ytext, int yleng)
+r_addlit(char *ytext, int yleng, yyscan_t yyscanner)
 {
+	GET_EXTRA;
 	/* enlarge buffer if needed */
 	if ((literallen+yleng) >= literalalloc)
 	{
@@ -874,8 +878,9 @@ addlit(char *ytext, int yleng)
 
 
 static void
-addlitchar(unsigned char ychar)
+r_addlitchar(unsigned char ychar, yyscan_t yyscanner)
 {
+	GET_EXTRA;
 	/* enlarge buffer if needed */
 	if ((literallen+1) >= literalalloc)
 	{
@@ -895,9 +900,10 @@ addlitchar(unsigned char ychar)
  * already known.
  */
 static char *
-litbufdup(void)
+r_litbufdup(yyscan_t yyscanner)
 {
 	char *new;
+	GET_EXTRA;
 
 	new = palloc(literallen + 1);
 	memcpy(new, literalbuf, literallen+1);
@@ -906,8 +912,9 @@ litbufdup(void)
 
 
 static unsigned char
-unescape_single_char(unsigned char c)
+r_unescape_single_char(unsigned char c, yyscan_t yyscanner)
 {
+	GET_EXTRA;
 	/* Normally we wouldn't expect to see \n where n has its high bit set
 	 * but we set the flag to check the string if we do get it, so
 	 * that this doesn't become a way of getting around the coding validity
@@ -934,8 +941,9 @@ unescape_single_char(unsigned char c)
 }
 
 static void
-check_string_escape_warning(unsigned char ychar)
+r_check_string_escape_warning(unsigned char ychar, yyscan_t yyscanner)
 {
+	GET_EXTRA;
 	if (ychar == '\'')
 	{
 		if (warn_on_first_escape && escape_string_warning)
@@ -961,8 +969,9 @@ check_string_escape_warning(unsigned char ychar)
 }
 
 static void
-check_escape_warning(void)
+r_check_escape_warning(yyscan_t yyscanner)
 {
+	GET_EXTRA;
 	if (warn_on_first_escape && escape_string_warning)
 		ereport(WARNING,
 				(errcode(ERRCODE_NONSTANDARD_USE_OF_ESCAPE_CHARACTER),
