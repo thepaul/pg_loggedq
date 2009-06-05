@@ -49,6 +49,12 @@ lexer_destroy(yyscan_t scanner)
     free(extra);
 }
 
+YYSTYPE*
+lexer_lval(yyscan_t yyscanner)
+{
+    return &(base_yyget_extra(yyscanner)->_yylval);
+}
+
 char*
 errmsg(const char* fmt, ...)
 {

@@ -11,6 +11,6 @@ int scanner_finish(yyscan_t yyscanner);
 yyscan_t lexer_init(const char* sql);
 void lexer_destroy(yyscan_t yyscanner);
 #define lexer_next(y) base_yylex(y)
-#define lexer_lval(y) (base_yyget_extra(y)->_yylval)
+YYSTYPE* lexer_lval(yyscan_t yyscanner);
 
 #endif

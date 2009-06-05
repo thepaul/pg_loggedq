@@ -9,7 +9,7 @@ int main()
     YYSTYPE* yylval;
 
     scanner = lexer_init("select f from bar WHERE 9 = 'f''o\\'o' and \"MO\"\"NKey\" + $6::int *~~& -24;");
-    yylval = &(lexer_lval(scanner));
+    yylval = lexer_lval(scanner);
 
     do {
         res = lexer_next(scanner);
