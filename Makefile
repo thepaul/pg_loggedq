@@ -5,7 +5,7 @@ CFLAGS := -Wall -g -Wno-unused-variable -Wno-unused-function
 LEX := flex
 LEXOPTIONS := --header-file=$(SCAN).h -R
 
-scan.so: $(SCAN).o
+scan.so: $(SCAN).o parser/adapt.o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
 $(SCAN).o: CFLAGS+=-fPIC -D_GNU_SOURCE -I.
@@ -14,6 +14,7 @@ $(SCAN).o: $(SCAN).c
 $(SCAN).c: $(SCAN).l
 	$(LEX) $(LEXOPTIONS) -o $@ $^
 
+parser/adapt.o: CFLAGS+=-fPIC
 parser/adapt.o: parser/adapt.c
 
 test: test.o $(SCAN).o parser/adapt.o

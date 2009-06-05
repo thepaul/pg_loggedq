@@ -5,11 +5,11 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <string.h>
+#include "adapt.h"
 #include "postgres.h"
 #include "gramparse.h"
 #include "scan.h"
 #include "per_scanner_data.h"
-#include "adapt.h"
 
 int seen_error = 0;
 
