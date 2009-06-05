@@ -20,6 +20,8 @@ lexer_init(const char* sql)
     yyscan_t scanner;
 
     extra = (per_scanner_data*) calloc(sizeof(per_scanner_data), 1);
+    if (extra == NULL)
+        return NULL;
 
     extra->_xcdepth = 0;
     extra->_dolqstart = NULL;
@@ -35,7 +37,10 @@ lexer_init(const char* sql)
     extra->_scanbuf = NULL;
 
     if (base_yylex_init_extra(extra, &scanner) != 0)
+    {
+        free(extra);
         return NULL;
+    }
     scanner_init(sql, scanner);
     return scanner;
 }
