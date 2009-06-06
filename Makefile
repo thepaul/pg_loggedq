@@ -1,15 +1,14 @@
 # pg_loggedq scanner module
 
 SCAN := parser/scan
-CFLAGS := -Wall -g -Wno-unused-variable -Wno-unused-function
+CFLAGS := -Wall -g -fPIC -I.
 LEX := flex
 LEXOPTIONS := --header-file=parser/scan.h -R
 
 libsqlscanner.a: parser/scan.o parser/adapt.o
 	$(AR) r $@ $^
 
-parser/scan.o: CFLAGS+=-D_GNU_SOURCE -I.
-parser/scan.o: parser/scan.c
+parser/scan.o: CFLAGS+=-D_GNU_SOURCE -Wno-unused-variable -Wno-unused-function
 
 parser/scan.c: parser/scan.l
 	$(LEX) $(LEXOPTIONS) -o $@ $^
