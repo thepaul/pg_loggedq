@@ -5,6 +5,9 @@ CFLAGS := -Wall -g -Wno-unused-variable -Wno-unused-function
 LEX := flex
 LEXOPTIONS := --header-file=$(SCAN).h -R
 
+libsqlscanner.a: $(SCAN).o parser/adapt.o
+	$(AR) r $@ $^
+
 scan.so: $(SCAN).o parser/adapt.o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
 
@@ -23,6 +26,6 @@ test: test.o $(SCAN).o parser/adapt.o
 test.o: $(SCAN).c
 
 clean:
-	$(RM) $(SCAN).[och] scan.so parser/adapt.o test.o test
+	$(RM) $(SCAN).[och] scan.so parser/adapt.o test.o test libsqlscanner.a
 
 .PHONY: clean

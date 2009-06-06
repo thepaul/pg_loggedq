@@ -1,5 +1,6 @@
 *.pyc
 *.so
 *.o
+*.a
 parser/scan.[ch]
 .*.swp
