@@ -1,4 +1,4 @@
-# postgres_logged_queries.py
+# pg_loggedq.py
 #
 # the paul mozy 2009
 
