@@ -4,3 +4,4 @@
 *.a
 parser/scan.[ch]
 .*.swp
+build/
