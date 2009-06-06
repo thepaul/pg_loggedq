@@ -85,9 +85,7 @@ static ScanKeyword scan_keyword;
 ScanKeyword*
 ScanKeywordLookup(const char* name)
 {
-    scan_keyword.name = strdup(name);
-    scan_keyword.value = KEYWORD;
-    return &scan_keyword;
+    return NULL;
 }
 
 void
