@@ -31,11 +31,11 @@ scanner_getnext(scannerobject* self, PyObject* args)
         Py_RETURN_NONE;
     case ICONST:
         tokname = "ICONST";
-        value = PyLong_FromLong(self->lval->ival);
+        value = PyInt_FromLong(self->lval->ival);
         break;
     case PARAM:
         tokname = "PARAM";
-        value = PyLong_FromLong(self->lval->ival);
+        value = PyInt_FromLong(self->lval->ival);
         break;
     case TYPECAST:
         tokname = "TYPECAST";
