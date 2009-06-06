@@ -6,7 +6,9 @@
 
 #include <Python.h>
 #include <structmember.h>
+#include "parser/adapt.h"
 #include "parser/per_scanner_data.h"
+#include "parser/gramparse.h"
 
 typedef struct {
     PyObject_HEAD
@@ -18,7 +20,7 @@ static PyObject*
 scanner_getnext(scannerobject* self, PyObject* args)
 {
     const char* tokname = NULL;
-    char[2] op = "\0\0";
+    char op[2] = "\0\0";
     PyObject* token = NULL;
     PyObject* value = NULL;
     int result;
@@ -71,7 +73,7 @@ scanner_getnext(scannerobject* self, PyObject* args)
         free(self->lval->str);
     }
     token = PyString_FromString(tokname);
-    return PyTuple_BuildTuple(token, value, NULL);
+    return PyTuple_Pack(2, token, value);
 }
 
 static void
@@ -86,7 +88,7 @@ scanner_new(PyTypeObject* subtype, PyObject* args, PyObject* kwargs)
 {
     scannerobject* scanner;
     const char* sql = NULL;
-    static const char const* kwlist[] = {"sql", NULL};
+    static char* kwlist[] = {"sql", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s", kwlist, &sql))
         return NULL;
