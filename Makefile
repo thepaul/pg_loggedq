@@ -3,29 +3,22 @@
 SCAN := parser/scan
 CFLAGS := -Wall -g -Wno-unused-variable -Wno-unused-function
 LEX := flex
-LEXOPTIONS := --header-file=$(SCAN).h -R
+LEXOPTIONS := --header-file=parser/scan.h -R
 
-libsqlscanner.a: $(SCAN).o parser/adapt.o
+libsqlscanner.a: parser/scan.o parser/adapt.o
 	$(AR) r $@ $^
 
-scan.so: $(SCAN).o parser/adapt.o
-	$(CC) $(LDFLAGS) -shared -o $@ $^
+parser/scan.o: CFLAGS+=-D_GNU_SOURCE -I.
+parser/scan.o: parser/scan.c
 
-$(SCAN).o: CFLAGS+=-fPIC -D_GNU_SOURCE -I.
-$(SCAN).o: $(SCAN).c
-
-$(SCAN).c: $(SCAN).l
+parser/scan.c: parser/scan.l
 	$(LEX) $(LEXOPTIONS) -o $@ $^
 
-parser/adapt.o: CFLAGS+=-fPIC
-parser/adapt.o: parser/adapt.c
-
-test: test.o $(SCAN).o parser/adapt.o
+test: test.o parser/scan.o parser/adapt.o
 	$(CC) $(LDOPTIONS) -o $@ $^
 
-test.o: $(SCAN).c
-
 clean:
-	$(RM) $(SCAN).[och] scan.so parser/adapt.o test.o test libsqlscanner.a
+	$(RM) parser/scan.[och] parser/adapt.o test.o test libsqlscanner.a
+	$(RM) -r build
 
 .PHONY: clean
