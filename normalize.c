@@ -2,9 +2,14 @@
 
 #define _ISOC99_SOURCE
 #include <stdio.h>
+#include <ctype.h>
 #include <errno.h>
-#include "adapt.h"
-#include "per_scanner_data.h"
+#include "parser/adapt.h"
+#include "parser/gramparse.h"
+#include "parser/per_scanner_data.h"
+
+static int
+writestr_escape(char* buf, int buflen, const char* src, char doubleme);
 
 /**
  * Normalizes an SQL statement.
@@ -32,8 +37,8 @@
  *            small, or
  *         -1 if there was some other error (errno should be set).
  */
-int normalize_q(const char* sql, char* buf, unsigned int buflen,
-                int remove_const)
+int
+normalize_q(const char* sql, char* buf, unsigned int buflen, int remove_const)
 {
     char* p = buf;
     char* bend = buf + buflen;
@@ -74,7 +79,7 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
         }                                                 \
         else                                              \
         {                                                 \
-            s = snprintf(p, bend - p, "%d", (n));         \
+            s = snprintf(p, bend - p, "%ld", (n));        \
             if (s < 0)                                    \
             {                                             \
                 *p = '\0';                                \
@@ -213,23 +218,25 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
             break;
 
         case IDENT:
-            char c;
-            int need_dq = 0;
-            freeme = tokval->str;
-            for (c = tokval->str; *c; ++c)
             {
-                if (isupper(c) || c == '"')
-                    need_dq = 1;
-            }
-            if (need_dq)
-            {
-                addchar('"');
-                addstr_escape(tokval->str, '"');
-                addchar('"');
-            }
-            else
-            {
-                addstr(tokval->str);
+                char* c;
+                int need_dq = 0;
+                freeme = tokval->str;
+                for (c = tokval->str; *c; ++c)
+                {
+                    if (isupper(*c) || *c == '"')
+                        need_dq = 1;
+                }
+                if (need_dq)
+                {
+                    addchar('"');
+                    addstr_escape(tokval->str, '"');
+                    addchar('"');
+                }
+                else
+                {
+                    addstr(tokval->str);
+                }
             }
             break;
 
@@ -270,7 +277,8 @@ error_out:
     return ret;
 }
 
-int writestr_escape(char* buf, int buflen, const char* src, char doubleme)
+static int
+writestr_escape(char* buf, int buflen, const char* src, char doubleme)
 {
     const char* psrc;
     char* p = buf;
