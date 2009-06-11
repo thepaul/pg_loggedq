@@ -136,22 +136,21 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
         {
         case ICONST:
             if (remove_const)
-            {
                 addchar('?');
-            }
             else
-            {
                 addnum(tokval->ival);
-            }
             break;
+
         case PARAM:
             addchar('$');
             addnum(tokval->ival);
             break;
+
         case TYPECAST:
             addchar(':');
             addchar(':');
             break;
+
         case BCONST:
             freeme = tokval->str;
             if (remove_const)
@@ -166,6 +165,7 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
                 addchar('\'');
             }
             break;
+
         case XCONST:
             freeme = tokval->str;
             if (remove_const)
@@ -180,6 +180,7 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
                 addchar('\'');
             }
             break;
+
         case FCONST:
             freeme = tokval->str;
             if (remove_const)
@@ -191,6 +192,7 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
                 addstr(tokval->str);
             }
             break;
+
         case SCONST:
             freeme = tokval->str;
             if (remove_const)
@@ -204,10 +206,12 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
                 addchar('\'');
             }
             break;
+
         case KEYWORD:
             freeme = tokval->keyword;
             addstr(tokval->keyword);
             break;
+
         case IDENT:
             char c;
             int need_dq = 0;
@@ -228,10 +232,12 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
                 addstr(tokval->str);
             }
             break;
+
         case Op:
             freeme = tokval->str;
             addstr(tokval->str);
             break;
+
         default:
             addchar(token);
             break;
@@ -244,6 +250,7 @@ int normalize_q(const char* sql, char* buf, unsigned int buflen,
         addchar(' ');
         token = lexer_next(scanner);
     }
+
     if (p > buf)
     {
         /* a space was output last- we don't want it */
@@ -303,7 +310,7 @@ int writestr_escape(char* buf, int buflen, const char* src, char doubleme)
             if (p >= bend - 1)
             {
                 *(bend - 1) = '\0';
-                return buflen + 1;  /* anything beyond buflen will do */
+                return buflen + 1;
             }
             *p++ = *psrc;
         }
