@@ -80,8 +80,6 @@ report_error(int code, const char* message, ...)
     fprintf(stderr, "REPORT_ERROR code %d: %s\n", code, message);
 }
 
-static ScanKeyword scan_keyword;
-
 ScanKeyword*
 ScanKeywordLookup(const char* name)
 {
