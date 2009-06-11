@@ -302,15 +302,17 @@ writestr_escape(char* buf, int buflen, const char* src, char doubleme)
     {
         if (*psrc == doubleme)
         {
-            if (p >= bend - 2)
+            if (p >= bend - 1)
             {
-                if (p < bend)
-                    *p = '\0';
-                else
-                    *(bend - 1) = '\0';
+                *(bend - 1) = '\0';
                 return buflen + 1;  /* anything beyond buflen will do */
             }
             *p++ = doubleme;
+            if (p == bend - 1)
+            {
+                *p = '\0';
+                return buflen + 1;
+            }
             *p++ = doubleme;
         }
         else
