@@ -137,5 +137,30 @@ int main()
         1024, 0
     );
 
+    test_norm(
+        "  select $foo$ \n"
+        "this is a multi-line dollar-quoted $string with $$ and \n"
+        "some weird \ttab\tcharacters and a 'false' $fooblah$ ending\n"
+        "and then the real one: $$foo$, 'that is all';",
+
+        "select ' \n"
+        "this is a multi-line dollar-quoted $string with $$ and \n"
+        "some weird \ttab\tcharacters and a ''false'' $fooblah$ ending\n"
+        "and then the real one: $' , 'that is all' ;",
+
+        1024, 0
+    );
+
+    test_norm(
+        "  select $foo$ \n"
+        "this is a multi-line dollar-quoted $string with $$ and \n"
+        "some weird \ttab\tcharacters and a 'false' $fooblah$ ending\n"
+        "and then the real one: $$foo$, 'that is all';",
+
+        "select ? , ? ;",
+
+        1024, 1
+    );
+
     return 0;
 }
