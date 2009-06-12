@@ -48,6 +48,7 @@ normalize_q(const char* sql, char* buf, unsigned int buflen, int remove_const)
     int s;
     int ret = 0;
     YYSTYPE* tokval;
+    char next_ws;
 
     if (buflen <= 0 || sql == NULL || buf == NULL)
     {
@@ -137,6 +138,7 @@ normalize_q(const char* sql, char* buf, unsigned int buflen, int remove_const)
     token = lexer_next(scanner);
     while (token != 0)
     {
+        next_ws = ' ';
         switch (token)
         {
         case ICONST:
@@ -247,6 +249,8 @@ normalize_q(const char* sql, char* buf, unsigned int buflen, int remove_const)
 
         default:
             addchar(token);
+            if (token == ';')
+                next_ws = '\n';
             break;
         }
         if (freeme)
@@ -254,7 +258,7 @@ normalize_q(const char* sql, char* buf, unsigned int buflen, int remove_const)
             free(freeme);
             freeme = NULL;
         }
-        addchar(' ');
+        addchar(next_ws);
         token = lexer_next(scanner);
     }
 
