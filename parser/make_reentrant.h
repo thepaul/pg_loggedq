@@ -44,4 +44,9 @@ static void r_check_escape_warning(yyscan_t yyscanner);
 #endif
 #define startlit() (yyextra->_literalbuf[0] = '\0', yyextra->_literallen = 0)
 
+#define ereport(errtype,erest) ({                              \
+    ((struct yyguts_t*)yyscanner)->yyextra_r->_seen_error = 1; \
+    report_error erest;                                        \
+})
+
 #endif

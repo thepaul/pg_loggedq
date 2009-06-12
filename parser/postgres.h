@@ -57,7 +57,6 @@ char* downcase_truncate_identifier(const char* str, int len, int mongoose);
 
 #define IS_HIGHBIT_SET(c) ((c) & 0x80)
 
-#define ereport(errtype,erest) (report_error erest)
 #define errcode(s) (s)
 #define errhint(s) (s)
 #define errposition(p) (p)

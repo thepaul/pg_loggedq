@@ -11,8 +11,6 @@
 #include "scan.h"
 #include "per_scanner_data.h"
 
-int seen_error = 0;
-
 yyscan_t
 lexer_init(const char* sql)
 {
@@ -30,6 +28,7 @@ lexer_init(const char* sql)
     extra->_standard_conforming_strings = false;
     extra->_warn_on_first_escape = false;
     extra->_saw_high_bit = false;
+    extra->_seen_error = false;
     extra->_literalbuf = NULL;
     extra->_literallen = 0;
     extra->_literalalloc = 0;
@@ -76,7 +75,6 @@ errmsg(const char* fmt, ...)
 void
 report_error(int code, const char* message, ...)
 {
-    seen_error = 1;
     fprintf(stderr, "REPORT_ERROR code %d: %s\n", code, message);
 }
 

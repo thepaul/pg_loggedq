@@ -28,6 +28,7 @@ struct _per_scanner_data {
     bool    _standard_conforming_strings;
     bool    _warn_on_first_escape;
     bool    _saw_high_bit;
+    bool    _seen_error;
 
     /*
      * literalbuf is used to accumulate literal values when multiple rules
