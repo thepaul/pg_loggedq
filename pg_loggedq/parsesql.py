@@ -1,6 +1,6 @@
 # parsesql.py
 
-from _parsesql import sqlscanner
+from _parsesql import sqlscanner, normalize
 
 def parse(sql):
     s = sqlscanner(sql)
@@ -53,14 +53,3 @@ def tokenrepr_noconst(tokname, val):
     if tokname.endswith('CONST'):
         return '?'
     return tokenrepr(tokname, val)
-
-def normalize_q(sql, remove_const=False):
-    parts = tuple(parse(sql))
-    if len(parts) == 0:
-        return ''
-    if remove_const:
-        my_tokenrepr = tokenrepr_noconst
-    else:
-        my_tokenrepr = tokenrepr
-    reprs = [my_tokenrepr(*pair) for pair in parts]
-    return ' '.join(reprs)

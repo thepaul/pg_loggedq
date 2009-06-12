@@ -9,6 +9,7 @@
 #include "parser/adapt.h"
 #include "parser/per_scanner_data.h"
 #include "parser/gramparse.h"
+#include "normalize.h"
 
 typedef struct {
     PyObject_HEAD
@@ -156,8 +157,53 @@ static PyTypeObject scanner_type = {
     (newfunc)scanner_new,                   /*tp_new*/
 };
 
+static PyObject*
+normalize_q_py(PyObject* self, PyObject* args, PyObject* kwargs)
+{
+    char* buf;
+    const char* sql;
+    int res;
+    int alloclen;
+    PyObject* p_remove_const = NULL;
+    PyObject* result = NULL;
+    int remove_const = 0;
+
+    static char* kwlist[] = {"sql", "remove_const", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|O", kwlist,
+                                     &sql, &remove_const))
+        return NULL;
+
+    if (p_remove_const != NULL && PyObject_IsTrue(p_remove_const))
+        remove_const = 1;
+
+    alloclen = strlen(sql) * 2;
+    while (1)
+    {
+        buf = (char*) malloc(alloclen);
+        res = normalize_q(sql, buf, alloclen, remove_const);
+        if (res < 0)
+        {
+            free(buf);
+            return PyErr_SetFromErrno(PyExc_RuntimeError);
+        }
+        if (res == 0)
+            break;
+        free(buf);
+        alloclen *= 2;
+    }
+
+    result = PyString_FromString(buf);
+    free(buf);
+    return result;
+}
+
 static PyMethodDef module_methods[] = {
-    {NULL} /* Sentinel */
+    {"normalize", (PyCFunction) normalize_q_py, METH_VARARGS,
+     "Given an SQL string, return a version of that query with all whitespace"
+     " and character escapes normalized. Optionally also removes literal"
+     " constants and replaces them with '?'."},
+    {NULL,} /* Sentinel */
 };
 
 PyMODINIT_FUNC
