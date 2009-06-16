@@ -199,7 +199,7 @@ normalize_q_py(PyObject* self, PyObject* args, PyObject* kwargs)
 }
 
 static PyMethodDef module_methods[] = {
-    {"normalize", (PyCFunction) normalize_q_py, METH_VARARGS,
+    {"normalize", (PyCFunction) normalize_q_py, METH_VARARGS | METH_KEYWORDS,
      "Given an SQL string, return a version of that query with all whitespace"
      " and character escapes normalized. Optionally also removes literal"
      " constants and replaces them with '?'."},
