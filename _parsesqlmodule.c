@@ -24,9 +24,10 @@ scanner_getnext(scannerobject* self, PyObject* args)
     char op[2] = "\0\0";
     PyObject* token = NULL;
     PyObject* value = NULL;
-    int result;
+    PyObject* result = NULL;
+    int toknum;
 
-    switch ((result = lexer_next(self->yyscanner)))
+    switch ((toknum = lexer_next(self->yyscanner)))
     {
     case 0:
         Py_RETURN_NONE;
@@ -65,7 +66,7 @@ scanner_getnext(scannerobject* self, PyObject* args)
         break;
     default:
         tokname = "OP";
-        op[0] = result;
+        op[0] = toknum;
         value = PyString_FromString(op);
     }
     if (value == NULL)
@@ -74,7 +75,10 @@ scanner_getnext(scannerobject* self, PyObject* args)
         free(self->lval->str);
     }
     token = PyString_FromString(tokname);
-    return PyTuple_Pack(2, token, value);
+    result = PyTuple_Pack(2, token, value);
+    Py_DECREF(value);
+    Py_DECREF(token);
+    return result;
 }
 
 static void
