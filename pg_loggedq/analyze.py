@@ -42,3 +42,17 @@ def tally_queries(querytuples, max_tblsize=64000):
         v[0] = v[0] / float(v[2])
 
     return knownq
+
+def translate_queries(querytyples, outf):
+    for pid, tstamp, uname, duration, stmt in querytuples:
+        nstmt = normalize(stmt, remove_const=True)
+        outf.write('%f\t%s\t%s\n' % (duration, uname, nstmt))
+
+def translate_queries_from(fname, outfname):
+    in_f = file(fname, 'r')
+    out_f = file(outfname, 'w')
+    try:
+        translate_queries(loglines.filter_out_queries(loglines.loglines_to_logtuples(loglines.syslog_to_loglines(in_f))), out_f)
+    finally:
+        out_f.close()
+        in_f.close()
