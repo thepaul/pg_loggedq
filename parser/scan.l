@@ -855,6 +855,7 @@ scanner_finish(yyscan_t yyscanner)
 	GET_EXTRA;
 	yy_delete_buffer(scanbufhandle, yyscanner);
 	pfree(scanbuf);
+	pfree(literalbuf);
 }
 
 
