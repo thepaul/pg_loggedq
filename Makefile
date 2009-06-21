@@ -1,9 +1,15 @@
 # pg_loggedq scanner module
 
 SCAN := parser/scan
-CFLAGS := -Wall -g -fPIC -I.
+CFLAGS := -Wall -fPIC -I.
 LEX := flex
 LEXOPTIONS := --header-file=parser/scan.h -R
+
+ifeq ($(DEBUG),1)
+CFLAGS += -g
+else
+CFLAGS += -O3
+endif
 
 libsqlscanner.a: parser/scan.o parser/adapt.o normalize.o
 	$(AR) r $@ $^
