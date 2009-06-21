@@ -30,8 +30,8 @@ def syslog_to_loglines(linesource, wait_for_msgend=5000, check_for_dead=14):
     @param wait_for_msgend If we have processed this many lines without
                seeing another message from pid X, consider its last message
                complete
-    @param check_for_dead A power of 2. Checks will be made for expired
-               backends every 2**check_for_dead lines.
+    @param check_for_dead An exponent to be applied to 2. Checks will be made
+               for expired backends every 2**check_for_dead lines.
     """
 
     fmt_re = re.compile(r'''
