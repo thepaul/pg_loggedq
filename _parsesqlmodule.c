@@ -175,7 +175,7 @@ normalize_q_py(PyObject* self, PyObject* args, PyObject* kwargs)
     static char* kwlist[] = {"sql", "remove_const", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|O", kwlist,
-                                     &sql, &remove_const))
+                                     &sql, &p_remove_const))
         return NULL;
 
     if (p_remove_const != NULL && PyObject_IsTrue(p_remove_const))
