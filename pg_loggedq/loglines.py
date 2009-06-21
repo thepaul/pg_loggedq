@@ -125,13 +125,17 @@ def loglines_to_logtuples(msgsource):
     """
 
     msg_re = re.compile(r'''
-        (?P<tstamp>\d{4}-\d{2}-\d{2} \s \d{2}:\d{2}:\d{2} \s [A-Z]{3,4})
+        (\d{4})-(\d{2})-(\d{2}) # date
         \s
-        (?P<uname>[a-zA-Z0-9_]+)
+        (\d{2}):(\d{2}):(\d{2}) # time
         \s
-        (?P<level>LOG|ERROR|NOTICE)
+        ([A-Z]{3,4})            # timezone
+        \s
+        ([a-zA-Z0-9_]+)         # username
+        \s
+        (LOG|ERROR|NOTICE)      # level
         : \s\s
-        (?P<msg>.*)
+        (.*)                    # message
         $
     ''', re.X | re.S)
 
@@ -142,10 +146,16 @@ def loglines_to_logtuples(msgsource):
             #warn("threw away unparseable message %r" % msg, ThrownAwayWarning)
             throwaway += 1
             continue
-        tstamp, uname, level, submsg = mch.group('tstamp', 'uname', 'level', 'msg')
+        yr, mon, day, hr, minute, sec, tz, uname, level, submsg = \
+                mch.group(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
         try:
-            t = time.strptime(tstamp.rsplit(None, 1)[0], '%Y-%m-%d %H:%M:%S')
-            t = int(time.mktime(t))
+            yr = int(yr)
+            mon = int(mon)
+            day = int(day)
+            hr = int(hr)
+            minute = int(minute)
+            sec = int(sec)
+            t = int(time.mktime((yr, mon, day, hr, minute, sec, 0, 1, -1)))
         except TypeError:
             #warn("threw away message w/ unparseable time %r" % msg, ThrownAwayWarning)
             throwaway += 1
