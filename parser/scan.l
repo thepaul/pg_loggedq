@@ -296,13 +296,13 @@ operator		{op_chars}+
  * backup when the {real} rule fails to match completely.
  */
 
-integer			{digit}+
-decimal			(({digit}*\.{digit}+)|({digit}+\.{digit}*))
+integer			[-+]?{digit}+
+decimal			[-+]?(({digit}*\.{digit}+)|({digit}+\.{digit}*))
 real			({integer}|{decimal})[Ee][-+]?{digit}+
 realfail1		({integer}|{decimal})[Ee]
 realfail2		({integer}|{decimal})[Ee][-+]
 
-param			\${integer}
+param			\${digit}+
 
 other			.
 
