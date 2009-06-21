@@ -261,6 +261,7 @@ normalize_q(const char* sql, char* buf, unsigned int buflen, int remove_const)
         addchar(next_ws);
         token = lexer_next(scanner);
     }
+    lexer_destroy(scanner);
 
     if (p > buf)
     {
@@ -278,6 +279,7 @@ normalize_q(const char* sql, char* buf, unsigned int buflen, int remove_const)
 error_out:
     if (freeme)
         free(freeme);
+    lexer_destroy(scanner);
     return ret;
 }
 
