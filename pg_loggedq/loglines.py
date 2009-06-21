@@ -57,15 +57,9 @@ def syslog_to_loglines(linesource, wait_for_msgend=5000, check_for_dead=14):
         # they never logged another message, we were never sure when the
         # last message finished)
         if linenum & mask == 0:
-            threshhold = linenum - wait_for_msgend
-            newbackends = {}
-            for b, v in backends.iteritems():
-                if v:
-                    if v[0] < threshhold:
-                        yield (b, '\n'.join(v[1]))
-                    else:
-                        newbackends[b] = v
-            backends = newbackends
+            backends, mq = clean_backends(backends, linenum - wait_for_msgend)
+            for tup in mq:
+                yield tup
 
         # parse the line
         mch = fmt_re.match(line)
@@ -99,6 +93,17 @@ def syslog_to_loglines(linesource, wait_for_msgend=5000, check_for_dead=14):
 
     if throwaway:
         warn("threw away %d lines" % throwaway, ThrownAwayWarning)
+
+def clean_backends(backends, threshold):
+    newbackends = {}
+    messageq = []
+    for b, v in backends.iteritems():
+        if v:
+            if v[0] < threshold:
+                messageq.append((b, '\n'.join(v[1])))
+            else:
+                newbackends[b] = v
+    return newbackends, messageq
 
 def loglines_to_logtuples(msgsource):
     """
